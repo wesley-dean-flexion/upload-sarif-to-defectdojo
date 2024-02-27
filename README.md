@@ -1,5 +1,58 @@
 # Upload Sarif results to Defect Dojo
 
+## Overview
+
+This is a shell script that will iterate across a series of filenames
+passed in and upload the results to a DefectDojo instance.  This
+hope is to have one process generate SARIF results (e.g., Megalinter)
+so that this script can upload the results.
+
+There exist actions in the GitHub Actions Marketplace that will
+upload SARIF results to DefectDojo, such as:
+[defectdojo-import-scan](https://github.com/marketplace/actions/defectdojo-import-scan)
+
+However, we want to be able to be able to upload results to
+an internal, non-Internet-accessible DefectDojo instance, potentially
+using an internal CI/CD system (e.g., a Jenkins instance).
+
+Configuration for the tool is expected to be provided by environment
+variables; this is to support clean integration with a CI/CD
+system that populates environment variables rather than using
+flags.  Additionally, the tool is able to use a configuration
+file (e.g., `.env`) that can provide values.
+
+The expected usage pattern is for a repository to include a
+configuration file with parameters like project name, whether
+or not to push results to Jira, etc. and environment variables to
+pass server details and authentication credentials.  It's possible
+to use all environment variables or all configuration files or
+some mix.
+
+The script supports passing multiple files to be uploaded, even
+if those files are in different locations or even associated with
+different projects. In situations like these, a configuration
+file for each location is supported.
+
+Several locations for configuration files are searched with the
+first one found being used:
+
+1. current directory's uploadsarifdd.conf
+2. current directory's .uploadsarifdd.conf
+3. file's repo's uploadsarifdd.conf
+4. file's repo's .uploadsarif.dd.conf
+5. ~/uploadsarifdd.conf
+6. ~/.uploadsarifdd.conf
+
+Future plans may include specifying the configuration via
+CLI flag, supporting additional scan types, and/or additional
+fields from DefectDojo's import-scan endpoint.
+
+### Examples
+
+```bash
+upload_sarif_to_defectdojo.bash megalinter-reports/sarif/*.sarif
+```
+
 ## Configuration Values
 
 ### DD_TOKEN
