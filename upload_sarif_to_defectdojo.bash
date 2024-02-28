@@ -296,6 +296,8 @@ for filename in "$@" ; do
     fi
   done
 
+  NOOP="${NOOP:-echo}"
+
   if [ -z "${DD_TOKEN:-}" ] ; then
     echo "No value for DD_TOKEN provided" 1>&2
     exit 1
@@ -342,7 +344,7 @@ for filename in "$@" ; do
     form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
   fi
 
-  echo curl -X 'POST' \
+  "$NOOP" curl -X 'POST' \
     "${DD_SERVER_PROTO:-https}://${DD_SERVER_HOST}${DD_SERVER_PATH:-/api/v2/import-scan/}" \
     -H "accept: application/json" \
     -H "Content-Type: multipart/form-data" \
