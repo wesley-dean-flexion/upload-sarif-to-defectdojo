@@ -258,96 +258,234 @@ get_commit_hash() {
 }
 
 
-declare -a configuration_sources
-declare -a form_values
+## @fn die
+## @brief receive a trapped error and display helpful debugging details
+## @details
+## When called -- presumably by a trap -- die() will provide details
+## about what happened, including the filename, the line in the source
+## where it happened, and a stack dump showing how we got there.  It
+## will then exit with a result code of 1 (failure)
+## @retval 1 always returns failure
+## @par Example
+## @code
+## trap die ERR
+## @endcode
+die() {
+  printf "ERROR %s in %s AT LINE %s\n" "$?" "${BASH_SOURCE[0]}" "${BASH_LINENO[0]}" 1>&2
 
-if [ "$#" -eq 0 ] ; then
-  echo "Error: no report filenames passed" 1>&2
+  local i=0
+  local FRAMES=${#BASH_LINENO[@]}
+
+  # FRAMES-2 skips main, the last one in arrays
+  for ((i = FRAMES - 2; i >= 0; i--)); do
+    printf "  File \"%s\", line %s, in %s\n" "${BASH_SOURCE[i + 1]}" "${BASH_LINENO[i]}" "${FUNCNAME[i + 1]}"
+    # Grab the source code of the line
+    sed -n "${BASH_LINENO[i]}{s/^/    /;p}" "${BASH_SOURCE[i + 1]}"
+  done
   exit 1
-fi
+}
 
+## @fn display_usage
+## @brief display some auto-generated usage information
+## @details
+## This will take two passes over the script -- one to generate
+## an overview based on everything between the @file tag and the
+## first blank line and another to scan through getopts options
+## to extract some hints about how to use the tool.
+## @retval 0 if the extraction was successful
+## @retval 1 if there was a problem running the extraction
+## @par Example
+## @code
+## for arg in "$@" ; do
+##   shift
+##   case "$arg" in
+##     '--word') set -- "$@" "-w" ;;   ##- see -w
+##     '--help') set -- "$@" "-h" ;;   ##- see -h
+##     *)        set -- "$@" "$arg" ;;
+##   esac
+## done
+##
+## # process short options
+## OPTIND=1
+###
+##
+## while getopts "w:h" option ; do
+##   case "$option" in
+##     w ) word="$OPTARG" ;; ##- set the word value
+##     h ) display_usage ; exit 0 ;;
+##     * ) printf "Invalid option '%s'" "$option" 2>&1 ; display_usage 1>&2 ; exit 1 ;;
+##   esac
+## done
+## @endcode
+display_usage() {
+  local overview
+  overview="$(sed -Ene '
+  /^[[:space:]]*##[[:space:]]*@file/,${/^[[:space:]]*$/q}
+  s/[[:space:]]*@(author|copyright|version|)/\1:/
+  s/[[:space:]]*@(note|remarks?|since|test|todo||version|warning)/\1:\n/
+  s/[[:space:]]*@(pre|post)/\1 condition:\n/
+  s/^[[:space:]]*##([[:space:]]*@[^[[:space:]]*[[:space:]]*)*//p' < "$0")"
 
-for filename in "$@" ; do
- form_values=()
+  local usage
+  usage="$(
+    (
+      sed -Ene "s/^[[:space:]]*(['\"])([[:alnum:]]*)\1[[:space:]]*\).*##-[[:space:]]*(.*)/\-\2\t\t: \3/p" < "$0"
+      sed -Ene "s/^[[:space:]]*(['\"])([-[:alnum:]]*)*\1[[:space:]]*\)[[:space:]]*set[[:space:]]*--[[:space:]]*(['\"])[@$]*\3[[:space:]]*(['\"])(-[[:alnum:]])\4.*##-[[:space:]]*(.*)/\2\t\t: \6/p" < "$0"
+    ) | sort --ignore-case
+  )"
 
-  configuration_sources=(
-  "./uploadsarifdd.conf"
-  "./.uploadsarifdd.conf"
-  )
-
-  if is_git_repository "$filename" ; then
-    configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/uploadsarifdd.conf")
-    configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/.uploadsarifdd.conf")
+  if [ -n "$overview" ]; then
+    printf "Overview\n%s\n" "$overview"
   fi
 
-  configuration_sources+=("${HOME}/uploadsarifdd.conf")
-  configuration_sources+=("${HOME}/.uploadsarifdd.conf")
+  if [ -n "$usage" ]; then
+    printf "\nUsage:\n%s\n" "$usage"
+  fi
+}
 
-  for configuration_file in "${configuration_sources[@]}" ; do
-    if [ -e "$configuration_file" ] ; then
-      echo "Importing configuration from $configuration_file"
 
-      set -o allexport
-      # shellcheck disable=SC1090
-      source "$configuration_file"
-      set +o allexport
+## @fn main()
+## @brief This is the main program loop.
+main() {
 
-      break
-    fi
+  trap die ERR
+
+  ###
+  ### set values from their defaults here
+  ###
+
+  declare -a configuration_sources
+  declare -a form_values
+
+  DRYRUN="${DRYRUN:-echo}"
+
+  for arg in "$@"; do
+    shift
+    case "$arg" in
+      '--branch') set -- "$@" "-b" ;; ##- see -b
+      '--config') set -- "$@" "-c" ;; ##- see -c
+      '--date') set -- "$@" "-d" ;; ##- see -d
+      '--dryrun') set -- "$@" "-D" ;; ##- see -D
+      '--engagement') set -- "$@" "-e" ;; ##- see -e
+      '--help') set -- "$@" "-h" ;; ##- see -h
+      '--mime-type') set -- "$@" "-m" ;; ##- see -m
+      '--product') set -- "$@" "-p" ;; ##- see -p
+      '--server') set -- "$@" "-s" ;; ##- see -s
+      '--severity') set -- "$@" "-S" ;; ##- see -S
+      '--scan-type') set -- "$@" "-t" ;; ##- see -t
+      '--url') set -- "$@" "-u" ;; ##- see -u
+      *) set -- "$@" "$arg" ;;
+    esac
   done
 
-  NOOP="${NOOP:-echo}"
+  OPTIND=1
+  while getopts "b:c:d:De:hm:p:s:S:t:u:" opt; do
+    case "$opt" in
+      'b') DD_BRANCH="$OPTARG" ;; ##- set the branch to report
+      'c') configuration_sources+=("$OPTARG") ;; ##- specify a configuration file
+      'd') DD_SCAN_DATE="$OPTARG" ;; ##- set the scan date
+      'D') DRYRUN="echo" ;; ##- show curl command but don't send it
+      'e') DD_ENGAGEMENT="$OPTARG" ;; ##- set the engagement
+      'h') display_usage ; exit 0 ;; ##- view the help documentation
+      'm') DD_FILE_TYPE="$OPTARG" ;; ##- set the MIME type of the file
+      'p') DD_PRODUCT="$OPTARG" ;; ##- set the product
+      's') DD_SERVER_HOST="$OPTARG" ;; ##- set the DefectDojo server
+      'S') DD_MINIMUM_SEVERITY="$OPTARG" ;; ##- set the minimum severity to include
+      't') DD_SCAN_TYPE="$OPTARG" ;; ##- set the type of scan we're reporting
+      'u') DD_SCM_URL="$OPTARG" ;; ##- set the URL to the SCM
+      *)
+        printf "Invalid option '%s'" "$opt" 1>&2
+        display_usage 1>&2
+        exit 1
+        ;;
+    esac
+  done
 
-  if [ -z "${DD_TOKEN:-}" ] ; then
-    echo "No value for DD_TOKEN provided" 1>&2
-    exit 1
-  fi
+  shift "$((OPTIND - 1))"
 
-  if [ -z "$DD_PRODUCT" ] ; then
-    echo "No value for DD_PRODUCT provided" 1>&2
-    exit 1
-  fi
+  for filename in "$@" ; do
+   form_values=()
 
-  if [ -z "$DD_SERVER_HOST" ] ; then
-    echo "No value for DD_SERVER_HOST provided" 1>&1
-    exit 1
-  fi
+    configuration_sources=(
+    "./uploadsarifdd.conf"
+    "./.uploadsarifdd.conf"
+    )
 
-  # attach form values for DefectDojo's API
-  form_values+=("active=${DD_ACTIVE:-true}")
-  form_values+=("close_old_findings=${DD_CLOSE_OLD_FINDINGS:-false}")
-  form_values+=("close_old_findings_product_scope=${DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE:-false}")
-  form_values+=("create_finding_groups_for_all_findings=${DD_CREATE_FINDINGS_GROUP:-false}")
-  form_values+=("engagement_name=${DD_ENGAGEMENT:-cicd}")
-  form_values+=("minimum_severity=${DD_MINIMUM_SEVERITY:-Info}")
-  form_values+=("product_name=${DD_PRODUCT?No DD_PRODUCT provided}")
-  form_values+=("push_to_jira=${DD_PUSH_TO_JIRA:-false}")
-  form_values+=("scan_date=${DD_SCAN_DATE:-$(get_scan_date "$filename")}")
-  form_values+=("scan_type=${DD_SCAN_TYPE:-$(get_scan_type "$filename")}")
-  form_values+=("verified=${DD_VERIFIED:-true}")
+    if is_git_repository "$filename" ; then
+      configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/uploadsarifdd.conf")
+      configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/.uploadsarifdd.conf")
+    fi
 
-  # attach the filename of the scan results with curl's `@` notation
-  form_values+=("file=@${filename};type=${DD_FILE_TYPE:-$(get_mime_type "$filename")}")
+    configuration_sources+=("${HOME}/uploadsarifdd.conf")
+    configuration_sources+=("${HOME}/.uploadsarifdd.conf")
 
-  if is_git_repository "$filename" \
-  || [ -n "${DD_BRANCH:-}" ] ; then
-    form_values+=("branch=${DD_BRANCH:-$(git_branch "$filename")}")
-  fi
+    for configuration_file in "${configuration_sources[@]}" ; do
+      if [ -e "$configuration_file" ] ; then
+        echo "Importing configuration from $configuration_file"
 
-  if is_git_repository "$filename" \
-  || [ -n "${DD_COMMIT_HASH:-}" ] ; then
-    form_values+=("commit_hash=${DD_COMMIT_HASH:-$(get_commit_hash "$filename")}")
-  fi
+        set -o allexport
+        # shellcheck disable=SC1090
+        source "$configuration_file"
+        set +o allexport
 
-  if is_git_repository "$filename" \
-  || [ -n "${DD_SCM_URL:-}" ] ; then
-    form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
-  fi
+        break
+      fi
+    done
 
-  "$NOOP" curl -X 'POST' \
-    "${DD_SERVER_PROTO:-https}://${DD_SERVER_HOST}${DD_SERVER_PATH:-/api/v2/import-scan/}" \
-    -H "accept: application/json" \
-    -H "Content-Type: multipart/form-data" \
-    -H "Authorization: Token ${DD_TOKEN}" \
-    "${form_values[@]/#/-F }"
-done
+    if [ -z "${DD_TOKEN:-}" ] ; then
+      echo "No value for DD_TOKEN provided" 1>&2
+      exit 1
+    fi
+
+    if [ -z "$DD_PRODUCT" ] ; then
+      echo "No value for DD_PRODUCT provided" 1>&2
+      exit 1
+    fi
+
+    if [ -z "$DD_SERVER_HOST" ] ; then
+      echo "No value for DD_SERVER_HOST provided" 1>&1
+      exit 1
+    fi
+
+    # attach form values for DefectDojo's API
+    form_values+=("active=${DD_ACTIVE:-true}")
+    form_values+=("close_old_findings=${DD_CLOSE_OLD_FINDINGS:-false}")
+    form_values+=("close_old_findings_product_scope=${DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE:-false}")
+    form_values+=("create_finding_groups_for_all_findings=${DD_CREATE_FINDINGS_GROUP:-false}")
+    form_values+=("engagement_name=${DD_ENGAGEMENT:-cicd}")
+    form_values+=("minimum_severity=${DD_MINIMUM_SEVERITY:-Info}")
+    form_values+=("product_name=${DD_PRODUCT?No DD_PRODUCT provided}")
+    form_values+=("push_to_jira=${DD_PUSH_TO_JIRA:-false}")
+    form_values+=("scan_date=${DD_SCAN_DATE:-$(get_scan_date "$filename")}")
+    form_values+=("scan_type=${DD_SCAN_TYPE:-$(get_scan_type "$filename")}")
+    form_values+=("verified=${DD_VERIFIED:-true}")
+
+    # attach the filename of the scan results with curl's `@` notation
+    form_values+=("file=@${filename};type=${DD_FILE_TYPE:-$(get_mime_type "$filename")}")
+
+    if is_git_repository "$filename" \
+    || [ -n "${DD_BRANCH:-}" ] ; then
+      form_values+=("branch=${DD_BRANCH:-$(git_branch "$filename")}")
+    fi
+
+    if is_git_repository "$filename" \
+    || [ -n "${DD_COMMIT_HASH:-}" ] ; then
+      form_values+=("commit_hash=${DD_COMMIT_HASH:-$(get_commit_hash "$filename")}")
+    fi
+
+    if is_git_repository "$filename" \
+    || [ -n "${DD_SCM_URL:-}" ] ; then
+      form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
+    fi
+
+    "$DRYRUN" curl -X 'POST' \
+      "${DD_SERVER_PROTO:-https}://${DD_SERVER_HOST}${DD_SERVER_PATH:-/api/v2/import-scan/}" \
+      -H "accept: application/json" \
+      -H "Content-Type: multipart/form-data" \
+      -H "Authorization: Token ${DD_TOKEN}" \
+      "${form_values[@]/#/-F }"
+  done
+}
+
+# if we're not being sourced and there's a function named `main`, run it
+[[ "$0" == "${BASH_SOURCE[0]}" ]] && [ "$(type -t "main")" = "function" ] && main "$@"
