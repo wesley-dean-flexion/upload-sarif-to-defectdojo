@@ -357,7 +357,7 @@ main() {
   declare -a configuration_sources
   declare -a form_values
 
-  DRYRUN="${DRYRUN:-echo}"
+  DRYRUN="${DRYRUN:-:}"
 
   for arg in "$@"; do
     shift
