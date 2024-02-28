@@ -48,7 +48,7 @@
 ## Future plans may include specifying the configuration via
 ## CLI flag, supporting additional scan types, and/or additional
 ## fields from DefectDojo's import-scan endpoint.
-## 
+##
 ## @par Examples
 ## @code
 ## upload_sarif_to_defectdojo.bash megalinter-reports/sarif/*.sarif
@@ -96,6 +96,7 @@ is_git_repository() {
 ## @param filename the file to use as a basis for searching
 ## @retval 0 (True) if a branch could be determined
 ## @retval 1 (False) if a branch could not be determined
+## @returns the current branch of the repository
 ## @par Examples
 ## @code
 ## filename=~/src/projecta
@@ -125,6 +126,7 @@ git_branch() {
 ## @param filename the filename to examine
 ## @retval 0 (True) if a scan type was determined
 ## @retval 1 (False) if a scan type could not be determined
+## @returns the scan type of the specified file
 ## @par Examples
 ## @code
 ## echo "The scan type was $(get_scan_type "foobar.sarif")"
@@ -152,10 +154,12 @@ get_scan_type() {
 ## `file` will optimally detect the type; for example, a SARIF
 ## file is reported as "text/plain" rather than ## "application/sarif"
 ## Also, we're doing the simple test first because want to
-## minimize the number of external dependencies
+## minimize the number of external dependencies.  The result is
+## returned via STDOUT.
 ## @param filename the filename to examine
 ## @retval 0 (True) if a MIME type could be guessed
 ## @retval 1 (False) if a MIME type couldn't be determined
+## @returns the MIME type of the specified file
 ## @par Examples
 ## @code
 ## curl -F "file=@filename;type=$(get_mime_type "$filename")" ...
@@ -183,6 +187,8 @@ get_mime_type() {
 ## @param DD_SCAN_DATE force this specific date
 ## @retval 0 (True) if a date could be determined
 ## @retval 1 (False) if a date could not be determined
+## @returns the date of the scan
+##
 ## @par Examples
 ## @code
 ## date1="$(get_scan_date "$filename1")"
@@ -191,8 +197,64 @@ get_mime_type() {
 ## get_scan_date "$filename3"
 ## @endcode
 get_scan_date() {
-  filename"${1?No filename provided to get_scan_date}"
-  scan_date="${DD_SCAN_DATE:-$(date +'%Y-%m-%d' -d "$(stat -L -c '%y' "$filename")")}"
+  filename="${1?No filename provided to get_scan_date}"
+  echo "${DD_SCAN_DATE:-$(date +'%Y-%m-%d' -d "$(stat -L -c '%y' "$filename")")}"
+}
+
+
+## @fn get_scm_url()
+## @brief get the SCM URL associated with a repository
+## @details
+## This is a wrapper around `git remote get-url` that will filter out
+## any usernames in the SCM URL and strip any .git extension
+##
+## https://wesley-dean-flexion@github.com/wesley-dean-flexion/sample.git
+##   becomes
+## https://github.com/wesley-dean-flexion/sample
+##
+## The default origin is 'origin' and the default location is the
+## current directory.  The result is returned via STDOUT.
+## @param filename where to find the repository
+## @param origin the origin to examine
+## @retval 0 (True) if the URL could be determined
+## @retval 1 (False) if the URL could not be determined
+## @returns URL to the SCM
+## @par Examples
+## @code
+## remote_url="$(get_scm_url "/path/to/repo")"
+## @endcode
+get_scm_url() {
+  directory="$(dirname "${1:-.}")"
+  origin="${2:-origin}"
+
+  (
+    cd "$directory" || exit 1
+    git remote get-url --push "$origin" | sed -Ee 's|://[^@]*@|://|' -Ee 's|\.git$||'
+  )
+}
+
+
+## @fn get_commit_hash()
+## @brief get the current full commit hash for a repository
+## @details
+## This is just a wrapper around `git log` that's easier to
+## read.  Nothing special, nothing filtered.  The output
+## is returned via STDOUT.
+## @param filename the location of the repository to examine
+## @retval 0 (True) if the commit hash could be found
+## @retval 1 (False) if the commit hash could not be found
+## @returns full commit hash
+## @par Examples
+## @code
+## commit_hash="$(get_commit_hash "/path/to/repo")"
+## @endcode
+get_commit_hash() {
+  directory="$(dirname "${1:-.}")"
+
+  (
+    cd "$directory" || exit 1
+    git log -n1 --pretty=format:"%H"
+  )
 }
 
 
@@ -234,7 +296,7 @@ for filename in "$@" ; do
     fi
   done
 
-  if [ -z "$DD_TOKEN" ] ; then
+  if [ -z "${DD_TOKEN:-}" ] ; then
     echo "No value for DD_TOKEN provided" 1>&2
     exit 1
   fi
@@ -249,34 +311,35 @@ for filename in "$@" ; do
     exit 1
   fi
 
-  scan_date="${DD_SCAN_DATE:-$(date +'%Y-%m-%d' -d "$(stat -L -c '%y' "$filename")")}"
-
+  # attach form values for DefectDojo's API
   form_values+=("active=${DD_ACTIVE:-true}")
-
+  form_values+=("close_old_findings=${DD_CLOSE_OLD_FINDINGS:-false}")
+  form_values+=("close_old_findings_product_scope=${DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE:-false}")
+  form_values+=("create_finding_groups_for_all_findings=${DD_CREATE_FINDINGS_GROUP:-false}")
+  form_values+=("engagement_name=${DD_ENGAGEMENT:-cicd}")
   form_values+=("minimum_severity=${DD_MINIMUM_SEVERITY:-Info}")
-
+  form_values+=("product_name=${DD_PRODUCT?No DD_PRODUCT provided}")
+  form_values+=("push_to_jira=${DD_PUSH_TO_JIRA:-false}")
+  form_values+=("scan_date=${DD_SCAN_DATE:-$(get_scan_date "$filename")}")
+  form_values+=("scan_type=${DD_SCAN_TYPE:-$(get_scan_type "$filename")}")
   form_values+=("verified=${DD_VERIFIED:-true}")
 
-  form_values+=("scan_type=${DD_SCAN_TYPE:-$(get_scan_type "$filename")}")
-
-  form_values+=("product_name=${DD_PRODUCT?No DD_PRODUCT provided}")
-
-  form_values+=("engagement_name=${DD_ENGAGEMENT:-cicd}")
-
-  form_values+=("close_old_findings=${DD_CLOSE_OLD_FINDINGS:-false}")
-
-  form_values+=("close_old_findings_product_scope=${DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE:-false}")
-
-  form_values+=("push_to_jira=${DD_PUSH_TO_JIRA:-false}")
-
-  form_values+=("create_finding_groups_for_all_findings=${DD_CREATE_FINDINGS_GROUP:-false}")
-
-  form_values+=("scan_date=${scan_date}")
+  # attach the filename of the scan results with curl's `@` notation
   form_values+=("file=@${filename};type=${DD_FILE_TYPE:-$(get_mime_type "$filename")}")
 
   if is_git_repository "$filename" \
   || [ -n "${DD_BRANCH:-}" ] ; then
     form_values+=("branch=${DD_BRANCH:-$(git_branch "$filename")}")
+  fi
+
+  if is_git_repository "$filename" \
+  || [ -n "${DD_COMMIT_HASH:-}" ] ; then
+    form_values+=("commit_hash=${DD_COMMIT_HASH:-$(get_commit_hash "$filename")}")
+  fi
+
+  if is_git_repository "$filename" \
+  || [ -n "${DD_SCM_URL:-}" ] ; then
+    form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
   fi
 
   echo curl -X 'POST' \
