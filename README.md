@@ -53,6 +53,23 @@ fields from DefectDojo's import-scan endpoint.
 upload_sarif_to_defectdojo.bash megalinter-reports/sarif/*.sarif
 ```
 
+## CLI Flags
+
+| Short flag | Long Flag    | Description                              |
+|------------|--------------|------------------------------------------|
+| -b         | --branch     | set the branch to report                 |
+| -c         | --config     | specify a configuration file             |
+| -d         | --date       | set the scan date                        |
+| -D         | --dryrun     | dryrun -- show request but don't send it |
+| -e         | --engagement | set the engagement                       |
+| -h         | --help       | view the help documentation              |
+| -m         | --mime-type  | set the MIME type of the file            |
+| -p         | --product    | set the product                          |
+| -s         | --server     | set the DefectDojo server hostname       |
+| -S         | --severity   | set the minimum severity to include      |
+| -t         | --scan-type  | set the type of scan we're reporting     |
+| -u         | --url        | set the URL to the SCM                   |
+
 ## Configuration Values
 
 ### DD_TOKEN
