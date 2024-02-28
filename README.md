@@ -164,3 +164,18 @@ The default value is determined by the file's extension
 `DD_BRANCH` is the SCM branch where the finding was applicable
 
 This is an optional field with no default
+
+### DD_COMMIT_HASH
+
+`DD_COMMIT_HASH` is the hash of the commit that is being examined
+
+This is optional and the default value is determined using `git log`.
+
+### DD_SCM_URL
+
+`DD_SCM_URL` is the URL to the Source Code Management system for this repo
+
+This is optional and the default value is determined using `git remote`.
+Please be aware that some SCM URLs may include encoded credentials; the
+default is filtered to remove such credentials (and any `.git` on the
+end of the URL).
