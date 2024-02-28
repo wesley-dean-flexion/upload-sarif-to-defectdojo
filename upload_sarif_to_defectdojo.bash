@@ -44,15 +44,6 @@
 ## 4. file's repo's .uploadsarif.dd.conf
 ## 5. ~/uploadsarifdd.conf
 ## 6. ~/.uploadsarifdd.conf
-##
-## Future plans may include specifying the configuration via
-## CLI flag, supporting additional scan types, and/or additional
-## fields from DefectDojo's import-scan endpoint.
-##
-## @par Examples
-## @code
-## upload_sarif_to_defectdojo.bash megalinter-reports/sarif/*.sarif
-## @endcode
 
 
 set -euo pipefail
