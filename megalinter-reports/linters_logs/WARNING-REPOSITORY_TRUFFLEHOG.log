@@ -1,0 +1,25 @@
+Results of trufflehog linter (version 3.68.3)
+See documentation on https://megalinter.io/7.9.0/descriptors/repository_trufflehog/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /github/workspace
+Linter raw log:
+🐷🔑🐷  TruffleHog. Unearth your secrets. 🐷🔑🐷
+
+2024-02-29T20:56:51Z	info-0	trufflehog	running source	{"source_manager_worker_id": "5Rk3A", "with_units": true}
+✅ Found verified result 🐷🔑
+Detector Type: Github
+Decoder Type: BASE64
+Raw result: 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
+Scopes: admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo, user, workflow, write:discussion, write:packages
+Rotation_guide: https://howtorotate.com/docs/tutorials/github/
+Username: wesley-dean-flexion
+Url: https://github.com/wesley-dean-flexion
+Account_type: User
+Name: Wes Dean
+Company: @flexion 
+File: .git/config
+Line: 11
+
+2024-02-29T20:56:51Z	info-0	trufflehog	finished scanning	{"chunks": 61, "bytes": 165792, "verified_secrets": 1, "unverified_secrets": 0, "scan_duration": "245.856132ms"}
+

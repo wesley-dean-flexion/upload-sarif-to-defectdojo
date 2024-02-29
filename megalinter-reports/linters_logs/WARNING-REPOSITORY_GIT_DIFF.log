@@ -1,0 +1,17 @@
+Results of git_diff linter (version 2.43.0)
+See documentation on https://megalinter.io/7.9.0/descriptors/repository_git_diff/
+-----------------------------------------------
+
+❌ [ERROR] for workspace /github/workspace
+Linter raw log:
+upload_sarif_to_defectdojo.bash:71: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:96: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:214: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:237: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:313: trailing whitespace.
++    ( 
+
