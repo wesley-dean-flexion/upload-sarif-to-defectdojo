@@ -70,6 +70,31 @@ upload_sarif_to_defectdojo.bash megalinter-reports/sarif/*.sarif
 | -t         | --scan-type  | set the type of scan we're reporting     |
 | -u         | --url        | set the URL to the SCM                   |
 
+## Containerized Usage
+
+The tool may also be used in containerized form; a [Dockerfile](Dockerfile)
+has been provided to simplify running it.
+
+### Building the Image
+
+```bash
+docker build
+  -t ghcr.io/wesley-dean-flexion/upload-sarif-to-defectdojo
+  .
+```
+
+### Running the Image
+
+```bash
+docker run \
+  --rm \
+  -it -v "$PWD:$PWD" \
+  -w "$PWD" \
+  -u "$UID" \
+  ghrc.io/wesley-dean-flexion/upload-sarif-to-defectdojo \
+  megalinter-reports/sarif/*.sarif
+```
+
 ## Configuration Values
 
 ### DD_TOKEN
