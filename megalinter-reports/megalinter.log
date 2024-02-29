@@ -1,0 +1,200 @@
+----------------------------------------------------------------------------------------------------
+------------------------------------ MegaLinter, by OX Security ------------------------------------
+----------------------------------------------------------------------------------------------------
+ - Image Creation Date: 2024-02-11T21:46:52Z
+ - Image Revision: 190cd0dad6dc52b2de5b810e3b290c3d6bdcc0f2
+ - Image Version: v7.9.0
+----------------------------------------------------------------------------------------------------
+The MegaLinter documentation can be found at:
+ - https://megalinter.io/7.9.0
+----------------------------------------------------------------------------------------------------
+::group::MegaLinter initialization (expand for details)
+MegaLinter will analyze workspace [/github/workspace]
+GITHUB_REPOSITORY: wesley-dean-flexion/upload-sarif-to-defectdojo
+GITHUB_REF: refs/pull/12/merge
+GITHUB_RUN_ID: 8102460757
+
+
+[Activation] ANSIBLE_ANSIBLE_LINT has been set inactive, as subdirectory has not been found: ansible (set value "any" to always activate)
+[Activation] EDITORCONFIG_EDITORCONFIG_CHECKER has been set inactive, as none of these files has been found: ['.editorconfig']
+[Activation] JAVASCRIPT_ES has been set inactive, as none of these files has been found: ['.eslintrc.json', '.eslintrc.yml', '.eslintrc.yaml', '.eslintrc.js', '.eslintrc.cjs', 'package.json:eslintConfig']
+[Activation] JSON_NPM_PACKAGE_JSON_LINT has been set inactive, as none of these files has been found: ['package.json']
+[Activation] JSX_ESLINT has been set inactive, as none of these files has been found: ['.eslintrc.json', '.eslintrc.yml', '.eslintrc.yaml', '.eslintrc.js', '.eslintrc.cjs', 'package.json:eslintConfig']
+[Activation] KUBERNETES_KUBECONFORM has been set inactive, as subdirectory has not been found: kubernetes (set value "any" to always activate)
+[Activation] KUBERNETES_HELM has been set inactive, as none of these files has been found: ['Chart.yml', 'Chart.yaml']
+[Activation] KUBERNETES_KUBESCAPE has been set inactive, as none of these files has been found: ['Chart.yml', 'Chart.yaml']
+[SemgrepLinter] Deactivated because no ruleset has been defined
+[Activation] SALESFORCE_SFDX_SCANNER_APEX has been set inactive, as subdirectory has not been found: force-app (set value "any" to always activate)
+[Activation] SALESFORCE_SFDX_SCANNER_AURA has been set inactive, as subdirectory has not been found: force-app (set value "any" to always activate)
+[Activation] SALESFORCE_SFDX_SCANNER_LWC has been set inactive, as subdirectory has not been found: force-app (set value "any" to always activate)
+[Activation] SALESFORCE_LIGHTNING_FLOW_SCANNER has been set inactive, as subdirectory has not been found: force-app (set value "any" to always activate)
+[Activation] SPELL_VALE has been set inactive, as none of these files has been found: ['.vale.ini']
+[Activation] SQL_SQLFLUFF has been set inactive, as none of these files has been found: ['.sqlfluff']
+[Activation] SWIFT_SWIFTLINT has been set inactive, as none of these files has been found: ['.swiftlint.yml']
+[Activation] TSX_ESLINT has been set inactive, as none of these files has been found: ['.eslintrc.json', '.eslintrc.yml', '.eslintrc.yaml', '.eslintrc.js', '.eslintrc.cjs', 'package.json:eslintConfig']
+[Activation] TYPESCRIPT_ES has been set inactive, as none of these files has been found: ['.eslintrc.json', '.eslintrc.yml', '.eslintrc.yaml', '.eslintrc.js', '.eslintrc.cjs', 'package.json:eslintConfig']
+CLOJURE_CLJSTYLE has been temporary disabled in MegaLinter, please use a previous MegaLinter version or wait for the next one !
+MARKDOWN_REMARK_LINT has been temporary disabled in MegaLinter, please use a previous MegaLinter version or wait for the next one !
+Skipped linters: ANSIBLE_ANSIBLE_LINT, BASH_EXEC, CLOJURE_CLJSTYLE, COPYPASTE_JSCPD, EDITORCONFIG_EDITORCONFIG_CHECKER, JAVASCRIPT_ES, JAVASCRIPT_STANDARD, JSON_NPM_PACKAGE_JSON_LINT, JSX_ESLINT, KUBERNETES_HELM, KUBERNETES_KUBECONFORM, KUBERNETES_KUBESCAPE, MARKDOWN_REMARK_LINT, REPOSITORY_DEVSKIM, REPOSITORY_SEMGREP, SALESFORCE_LIGHTNING_FLOW_SCANNER, SALESFORCE_SFDX_SCANNER_APEX, SALESFORCE_SFDX_SCANNER_AURA, SALESFORCE_SFDX_SCANNER_LWC, SPELL_CSPELL, SPELL_PROSELINT, SPELL_VALE, SQL_SQLFLUFF, SWIFT_SWIFTLINT, TSX_ESLINT, TYPESCRIPT_ES, TYPESCRIPT_PRETTIER
+To receive reports as email, please set variable EMAIL_REPORTER_EMAIL
+::endgroup::
+::group::MegaLinter now collects the files to analyse (expand for details)
+Listing all files in directory [/github/workspace], then filter with:
+- File extensions: , .R, .RMD, .Rmd, .bash, .bicep, .c, .c++, .cc, .cdxml, .clj, .cljc, .cljs, .coffee, .cpp, .cs, .csproj, .css, .cu, .cuh, .cxx, .dart, .dash, .edn, .env, .feature, .go, .gradle, .graphql, .groovy, .gvy, .h, .h++, .hcl, .hh, .hpp, .htm, .html, .hxx, .java, .js, .json, .json5, .jsonc, .ksh, .kt, .kts, .lua, .markdown, .md, .mdx, .nf, .p6, .php, .pl, .pl6, .pm, .pm6, .pp, .proto, .ps1, .ps1xml, .psd1, .psm1, .psrc, .pssc, .py, .r, .raku, .rakumod, .rakutest, .rb, .rs, .rst, .saas, .scala, .scss, .sh, .smk, .sql, .t, .tex, .tf, .ts, .txt, .vb, .xml, .yaml, .yml
+- File names (regex): Containerfile, Dockerfile, Jenkinsfile, Makefile, Snakefile
+- Excluding regex: (.venv/|/test/|\.test\.|_test\.|/docs/|/index.html|.github/.*\.html)
+- Excluding .gitignored files [0]: 
+Kept [8] files on [9] found files
+MegaLinter flavor [ci_light] doesn't contain linters ACTION_ACTIONLINT,MARKDOWN_MARKDOWNLINT,MARKDOWN_MARKDOWN_LINK_CHECK,MARKDOWN_MARKDOWN_TABLE_FORMATTER,REPOSITORY_CHECKOV,REPOSITORY_DUSTILOCK,REPOSITORY_KICS,REPOSITORY_SYFT,SPELL_LYCHEE.
+As they're not available in this docker image, they will not be processed
+To solve this problem, please either: 
+- use default flavor oxsecurity/megalinter
+- add ignored linters in DISABLE or DISABLE_LINTERS variables in your .mega-linter.yml config file located in your root directory
+- ignore this message by setting config variable FLAVOR_SUGGESTIONS to false
+
++----MATCHING LINTERS-----+--------------------------+----------------+------------+
+| Descriptor | Linter     | Criteria                 | Matching files | Format/Fix |
++------------+------------+--------------------------+----------------+------------+
+| BASH       | shellcheck | .sh|.bash|.dash|.ksh     | 1              | no         |
+| BASH       | shfmt      | .sh|.bash|.dash|.ksh     | 1              | yes        |
+| DOCKERFILE | hadolint   | Containerfile|Dockerfile | 1              | no         |
+| REPOSITORY | git_diff   |                          | project        | no         |
+| REPOSITORY | gitleaks   |                          | project        | no         |
+| REPOSITORY | grype      |                          | project        | no         |
+| REPOSITORY | secretlint |                          | project        | no         |
+| REPOSITORY | trivy      |                          | project        | no         |
+| REPOSITORY | trivy-sbom |                          | project        | no         |
+| REPOSITORY | trufflehog |                          | project        | no         |
+| YAML       | prettier   | .yml|.yaml               | 5              | yes        |
+| YAML       | yamllint   | .yml|.yaml               | 5              | no         |
+| YAML       | v8r        | .yml|.yaml               | 5              | no         |
++------------+------------+--------------------------+----------------+------------+
+::endgroup::
+Processing linters on [4] parallel cores…
+::group::[32m✅ Linted [BASH] files with [shfmt] successfully - (0.02s)[0m (expand for details)
+- Using [shfmt v3.8.0] https://megalinter.io/7.9.0/descriptors/bash_shfmt
+- MegaLinter key: [BASH_SHFMT]
+- Rules config: identified by [shfmt]
+- Number of files analyzed: [1]
+::endgroup::
+::group::[32m✅ Linted [YAML] files with [prettier] successfully - (0.76s)[0m (expand for details)
+- Using [prettier v3.2.5] https://megalinter.io/7.9.0/descriptors/yaml_prettier
+- MegaLinter key: [YAML_PRETTIER]
+- Rules config: identified by [prettier]
+- Number of files analyzed: [5]
+::endgroup::
+::group::[32m✅ Linted [REPOSITORY] files with [secretlint] successfully - (0.77s)[0m (expand for details)
+- Using [secretlint v8.1.1] https://megalinter.io/7.9.0/descriptors/repository_secretlint
+- MegaLinter key: [REPOSITORY_SECRETLINT]
+- Rules config: [.secretlintrc.json]
+- Ignore file: [.secretlintignore]
+::endgroup::
+::group::[32m✅ Linted [YAML] files with [v8r] successfully - (5.36s)[0m (expand for details)
+- Using [v8r v3.0.0] https://megalinter.io/7.9.0/descriptors/yaml_v8r
+- MegaLinter key: [YAML_V8R]
+- Rules config: identified by [v8r]
+- Number of files analyzed: [5]
+::endgroup::
+::group::[32m✅ Linted [REPOSITORY] files with [trivy] successfully - (5.78s)[0m (expand for details)
+- Using [trivy v0.49.1] https://megalinter.io/7.9.0/descriptors/repository_trivy
+- MegaLinter key: [REPOSITORY_TRIVY]
+- Rules config: identified by [trivy]
+::endgroup::
+::group::[32m✅ Linted [REPOSITORY] files with [trivy-sbom] successfully - (5.5s)[0m (expand for details)
+- Using [trivy-sbom v0.49.1] https://megalinter.io/7.9.0/descriptors/repository_trivy_sbom
+- MegaLinter key: [REPOSITORY_TRIVY_SBOM]
+- Rules config: identified by [trivy-sbom]
+::endgroup::
+::group::[32m✅ Linted [DOCKERFILE] files with [hadolint] successfully - (1.07s)[0m (expand for details)
+- Using [hadolint v2.12.0] https://megalinter.io/7.9.0/descriptors/dockerfile_hadolint
+- MegaLinter key: [DOCKERFILE_HADOLINT]
+- Rules config: [.hadolint.yaml]
+- Number of files analyzed: [1]
+::endgroup::
+::group::[32m✅ Linted [BASH] files with [shellcheck] successfully - (1.18s)[0m (expand for details)
+- Using [shellcheck v0.9.0] https://megalinter.io/7.9.0/descriptors/bash_shellcheck
+- MegaLinter key: [BASH_SHELLCHECK]
+- Rules config: identified by [shellcheck]
+- Number of files analyzed: [1]
+::endgroup::
+::group::[32m✅ Linted [REPOSITORY] files with [gitleaks] successfully - (0.06s)[0m (expand for details)
+- Using [gitleaks v8.18.2] https://megalinter.io/7.9.0/descriptors/repository_gitleaks
+- MegaLinter key: [REPOSITORY_GITLEAKS]
+- Rules config: [.gitleaks.toml]
+::endgroup::
+::group::[33m✅ Linted [REPOSITORY] files with [git_diff]: Found 1 non blocking error(s) - (0.0s)[0m (expand for details)
+- Using [git_diff v2.43.0] https://megalinter.io/7.9.0/descriptors/repository_git_diff
+- MegaLinter key: [REPOSITORY_GIT_DIFF]
+- Rules config: identified by [git_diff]
+--Error detail:
+upload_sarif_to_defectdojo.bash:71: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:96: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:214: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:237: trailing whitespace.
++  ( 
+upload_sarif_to_defectdojo.bash:313: trailing whitespace.
++    ( 
+
+::endgroup::
+::group::[32m✅ Linted [YAML] files with [yamllint] successfully - (0.24s)[0m (expand for details)
+- Using [yamllint v1.34.0] https://megalinter.io/7.9.0/descriptors/yaml_yamllint
+- MegaLinter key: [YAML_YAMLLINT]
+- Rules config: [.yamllint.yml]
+- Number of files analyzed: [5]
+::endgroup::
+::group::[32m✅ Linted [REPOSITORY] files with [grype] successfully - (10.06s)[0m (expand for details)
+- Using [grype v0.74.5] https://megalinter.io/7.9.0/descriptors/repository_grype
+- MegaLinter key: [REPOSITORY_GRYPE]
+- Rules config: [.grype.yaml]
+::endgroup::
+::group::[33m✅ Linted [REPOSITORY] files with [trufflehog]: Found 1 non blocking error(s) - (7.32s)[0m (expand for details)
+- Using [trufflehog v3.68.3] https://megalinter.io/7.9.0/descriptors/repository_trufflehog
+- MegaLinter key: [REPOSITORY_TRUFFLEHOG]
+- Rules config: identified by [trufflehog]
+--Error detail:
+🐷🔑🐷  TruffleHog. Unearth your secrets. 🐷🔑🐷
+
+2024-02-29T20:56:51Z	info-0	trufflehog	running source	{"source_manager_worker_id": "5Rk3A", "with_units": true}
+✅ Found verified result 🐷🔑
+Detector Type: Github
+Decoder Type: BASE64
+Raw result: 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
+Scopes: admin:enterprise, admin:gpg_key, admin:org, admin:org_hook, admin:public_key, admin:repo_hook, delete:packages, delete_repo, gist, notifications, repo, user, workflow, write:discussion, write:packages
+Rotation_guide: https://howtorotate.com/docs/tutorials/github/
+Username: wesley-dean-flexion
+Url: https://github.com/wesley-dean-flexion
+Account_type: User
+Name: Wes Dean
+Company: @flexion 
+File: .git/config
+Line: 11
+
+2024-02-29T20:56:51Z	info-0	trufflehog	finished scanning	{"chunks": 61, "bytes": 165792, "verified_secrets": 1, "unverified_secrets": 0, "scan_duration": "245.856132ms"}
+
+::endgroup::
+[GitHub Comment Reporter] Posted summary as comment on wesley-dean-flexion/upload-sarif-to-defectdojo #PR12
+[Updated Sources Reporter] copied 1 fixed source files in folder /github/workspace/megalinter-reports/updated_sources.
+Download it from artifacts then copy-paste it in your local repo to apply linters updates
+
++----SUMMARY----+------------+---------------+-------+-------+--------+--------------+
+| Descriptor    | Linter     | Mode          | Files | Fixed | Errors | Elapsed time |
++---------------+------------+---------------+-------+-------+--------+--------------+
+| ✅ BASH       | shellcheck | list_of_files |     1 |       |      0 |        1.18s |
+| ✅ BASH       | shfmt      | list_of_files |     1 |     1 |      0 |        0.02s |
+| ✅ DOCKERFILE | hadolint   | list_of_files |     1 |       |      0 |        1.07s |
+| ✅ REPOSITORY | gitleaks   | project       |   n/a |       |      0 |        0.06s |
+| ⚠️ REPOSITORY | git_diff   | project       |   n/a |       |      1 |         0.0s |
+| ✅ REPOSITORY | grype      | project       |   n/a |       |      0 |       10.06s |
+| ✅ REPOSITORY | secretlint | project       |   n/a |       |      0 |        0.77s |
+| ✅ REPOSITORY | trivy      | project       |   n/a |       |      0 |        5.78s |
+| ✅ REPOSITORY | trivy-sbom | project       |   n/a |       |      0 |         5.5s |
+| ⚠️ REPOSITORY | trufflehog | project       |   n/a |       |      1 |        7.32s |
+| ✅ YAML       | prettier   | list_of_files |     5 |     0 |      0 |        0.76s |
+| ✅ YAML       | v8r        | list_of_files |     5 |       |      0 |        5.36s |
+| ✅ YAML       | yamllint   | list_of_files |     5 |       |      0 |        0.24s |
++---------------+------------+---------------+-------+-------+--------+--------------+
+
+[33m⚠️ Successfully linted all files, but with ignored errors[0m
