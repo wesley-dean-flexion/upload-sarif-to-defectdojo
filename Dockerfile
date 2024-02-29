@@ -11,5 +11,7 @@ RUN apk add --no-cache \
 COPY ./upload_sarif_to_defectdojo.bash /
 ENTRYPOINT ["/upload_sarif_to_defectdojo.bash"]
 
+HEALTHCHECK NONE
+
 LABEL org.opencontainers.image.source=https://github.com/wesley-dean-flexion/
 LABEL org.opencontainers.image.description="Upload SARIF to Defect Dojo"
