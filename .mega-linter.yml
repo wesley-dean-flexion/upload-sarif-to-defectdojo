@@ -12,6 +12,7 @@ IGNORE_GITIGNORED_FILES: true
 # attempt to apply fixes at this time
 APPLY_FIXES: "all"
 APPLY_FIXES_MODE: "commit"
+APPLY_FIXES_EVENT: "pull_request"
 
 # Disable devskim as it's reporting an error with no log message
 DISABLE_LINTERS:
