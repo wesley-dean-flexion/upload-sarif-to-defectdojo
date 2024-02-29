@@ -45,9 +45,7 @@
 ## 5. ~/uploadsarifdd.conf
 ## 6. ~/.uploadsarifdd.conf
 
-
 set -euo pipefail
-
 
 ## @fn is_git_repository()
 ## @brief determine if a file is in a git-associated file structure
@@ -76,7 +74,6 @@ is_git_repository() {
   )
 }
 
-
 ## @fn git_branch()
 ## @brief determine the current branch of a git repository
 ## @details
@@ -101,7 +98,6 @@ git_branch() {
     git branch --show-current
   )
 }
-
 
 ## @fn get_scan_type()
 ## @brief determine the scan type based on a filename
@@ -134,7 +130,6 @@ get_scan_type() {
   esac
 }
 
-
 ## @fn get_mime_type()
 ## @brief determine a file's MIME type based on a filename
 ## @details
@@ -166,7 +161,6 @@ get_mime_type() {
   esac
 }
 
-
 ## @fn get_scan_date()
 ## @brief determine when a scan report was updated
 ## @details
@@ -191,7 +185,6 @@ get_scan_date() {
   filename="${1?No filename provided to get_scan_date}"
   echo "${DD_SCAN_DATE:-$(date +'%Y-%m-%d' -d "$(stat -L -c '%y' "$filename")")}"
 }
-
 
 ## @fn get_scm_url()
 ## @brief get the SCM URL associated with a repository
@@ -224,7 +217,6 @@ get_scm_url() {
   )
 }
 
-
 ## @fn get_commit_hash()
 ## @brief get the current full commit hash for a repository
 ## @details
@@ -247,7 +239,6 @@ get_commit_hash() {
     git log -n1 --pretty=format:"%H"
   )
 }
-
 
 ## @fn die
 ## @brief receive a trapped error and display helpful debugging details
@@ -334,7 +325,6 @@ display_usage() {
   fi
 }
 
-
 ## @fn main()
 ## @brief This is the main program loop.
 main() {
@@ -377,7 +367,10 @@ main() {
       'd') DD_SCAN_DATE="$OPTARG" ;; ##- set the scan date
       'D') DRYRUN="echo" ;; ##- show curl command but don't send it
       'e') DD_ENGAGEMENT="$OPTARG" ;; ##- set the engagement
-      'h') display_usage ; exit 0 ;; ##- view the help documentation
+      'h')
+           display_usage
+                           exit 0
+                                  ;; ##- view the help documentation
       'm') DD_FILE_TYPE="$OPTARG" ;; ##- set the MIME type of the file
       'p') DD_PRODUCT="$OPTARG" ;; ##- set the product
       's') DD_SERVER_HOST="$OPTARG" ;; ##- set the DefectDojo server
@@ -394,15 +387,15 @@ main() {
 
   shift "$((OPTIND - 1))"
 
-  for filename in "$@" ; do
-   form_values=()
+  for filename in "$@"; do
+    form_values=()
 
     configuration_sources=(
-    "./uploadsarifdd.conf"
-    "./.uploadsarifdd.conf"
+      "./uploadsarifdd.conf"
+      "./.uploadsarifdd.conf"
     )
 
-    if is_git_repository "$filename" ; then
+    if is_git_repository "$filename"; then
       configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/uploadsarifdd.conf")
       configuration_sources+=("$(git rev-parse --show-toplevel --prefix "$filename")/.uploadsarifdd.conf")
     fi
@@ -410,8 +403,8 @@ main() {
     configuration_sources+=("${HOME}/uploadsarifdd.conf")
     configuration_sources+=("${HOME}/.uploadsarifdd.conf")
 
-    for configuration_file in "${configuration_sources[@]}" ; do
-      if [ -e "$configuration_file" ] ; then
+    for configuration_file in "${configuration_sources[@]}"; do
+      if [ -e "$configuration_file" ]; then
         echo "Importing configuration from $configuration_file"
 
         set -o allexport
@@ -423,17 +416,17 @@ main() {
       fi
     done
 
-    if [ -z "${DD_TOKEN:-}" ] ; then
+    if [ -z "${DD_TOKEN:-}" ]; then
       echo "No value for DD_TOKEN provided" 1>&2
       exit 1
     fi
 
-    if [ -z "$DD_PRODUCT" ] ; then
+    if [ -z "$DD_PRODUCT" ]; then
       echo "No value for DD_PRODUCT provided" 1>&2
       exit 1
     fi
 
-    if [ -z "$DD_SERVER_HOST" ] ; then
+    if [ -z "$DD_SERVER_HOST" ]; then
       echo "No value for DD_SERVER_HOST provided" 1>&1
       exit 1
     fi
@@ -455,17 +448,17 @@ main() {
     form_values+=("file=@${filename};type=${DD_FILE_TYPE:-$(get_mime_type "$filename")}")
 
     if is_git_repository "$filename" \
-    || [ -n "${DD_BRANCH:-}" ] ; then
+      || [ -n "${DD_BRANCH:-}" ]; then
       form_values+=("branch=${DD_BRANCH:-$(git_branch "$filename")}")
     fi
 
     if is_git_repository "$filename" \
-    || [ -n "${DD_COMMIT_HASH:-}" ] ; then
+      || [ -n "${DD_COMMIT_HASH:-}" ]; then
       form_values+=("commit_hash=${DD_COMMIT_HASH:-$(get_commit_hash "$filename")}")
     fi
 
     if is_git_repository "$filename" \
-    || [ -n "${DD_SCM_URL:-}" ] ; then
+      || [ -n "${DD_SCM_URL:-}" ]; then
       form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
     fi
 
