@@ -47,4 +47,4 @@ REPOSITORY_DEVSKIM_ARGUMENTS: "--skip-git-ignored-files"
 #   - indent switch case statements
 #   - place spaces around redirections
 #   - keep column alignment padding
-BASH_SHFMT_ARGUMENTS: -i 2 -bn -ci -sr -kp
+BASH_SHFMT_ARGUMENTS: -i 2 -bn -ci -sr -kp -w
