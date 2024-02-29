@@ -10,7 +10,7 @@ FILTER_REGEX_EXCLUDE: (.venv/|/test/|\.test\.|_test\.|/docs/|/index.html|.github
 IGNORE_GITIGNORED_FILES: true
 
 # don't attempt to apply fixes at this time
-APPLY_FIXES: "true"
+APPLY_FIXES: "all"
 
 # Disable devskim as it's reporting an error with no log message
 DISABLE_LINTERS:
