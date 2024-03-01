@@ -7,7 +7,7 @@ This should get you started:
 ```bash
 export DD_TOKEN="${DEFECT_DOJO_AUTH_TOKEN}"
 curl -s \
-  - o './upload_sarif_to_defectdojo.bash' \
+  -o './upload_sarif_to_defectdojo.bash' \
   -L 'https://raw.githubusercontent.com/wesley-dean-flexion/upload-sarif-to-defectdojo/main/upload_sarif_to_defectdojo.bash'
 ./upload_sarif_to_defectdojo.bash \
   -p "${PRODUCT}" \
