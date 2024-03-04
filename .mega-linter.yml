@@ -29,6 +29,9 @@ VALIDATE_ALL_CODEBASE: true
 # don't print the alpaca -- it's cute, but we don't need it in the logs
 PRINT_ALPACA: false
 
+# write a SARIF file
+SARIF_REPORTER: true
+
 # don't fail on finding (yet)
 DISABLE_ERRORS: true
 
