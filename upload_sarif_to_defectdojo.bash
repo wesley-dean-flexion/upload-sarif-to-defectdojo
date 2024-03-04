@@ -338,7 +338,7 @@ main() {
   declare -a configuration_sources
   declare -a form_values
 
-  DRYRUN="${DRYRUN:- }"
+  METHOD="${METHOD:-POST}"
 
   for arg in "$@"; do
     shift
@@ -365,7 +365,7 @@ main() {
       'b') DD_BRANCH="$OPTARG" ;; ##- set the branch to report
       'c') configuration_sources+=("$OPTARG") ;; ##- specify a configuration file
       'd') DD_SCAN_DATE="$OPTARG" ;; ##- set the scan date
-      'D') DRYRUN="echo" ;; ##- show curl command but don't send it
+      'D') METHOD="--head" ;; ##- show curl command but don't send it
       'e') DD_ENGAGEMENT="$OPTARG" ;; ##- set the engagement
       'h')
            display_usage
@@ -388,6 +388,9 @@ main() {
   shift "$((OPTIND - 1))"
 
   for filename in "$@"; do
+    if [ ! -e "$filename" ] ; then
+      break
+    fi
     form_values=()
 
     configuration_sources=(
@@ -462,7 +465,7 @@ main() {
       form_values+=("source_code_management_uri=${DD_SCM_URL:-$(get_scm_url "$filename")}")
     fi
 
-    "$DRYRUN" curl -X 'POST' \
+    curl -X "$METHOD" \
       "${DD_SERVER_PROTO:-https}://${DD_SERVER_HOST}${DD_SERVER_PATH:-/api/v2/import-scan/}" \
       -H "accept: application/json" \
       -H "Content-Type: multipart/form-data" \
