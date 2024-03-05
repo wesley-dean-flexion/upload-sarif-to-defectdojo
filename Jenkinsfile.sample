@@ -55,6 +55,30 @@ pipeline {
       defaultValue: 'DD_TOKEN',
       description: 'Defectdojo authentication token'
     )
+
+    choice(
+      name: 'minimum_severity',
+      choices: ['Info', 'Low', 'Medium', 'High', 'Critical'],
+      description: 'The minimum severity finding to record'
+    )
+
+    booleanParam(
+      name: 'close_old_findings',
+      defaultValue: false,
+      description: 'Close old findings'
+    )
+
+    booleanParam(
+      name: 'close_old_findings_product_scope',
+      defaultValue: false,
+      description: 'Close old findings with the same product scope'
+    )
+
+    booleanParam(
+      name: 'create_fndings_group',
+      defaultValue: false,
+      description: 'Whether or not to create a findings group'
+    )
   }
 
   environment {
@@ -66,7 +90,11 @@ pipeline {
     DD_SERVER_HOST = "$params.defectdojo_server_host"
     DD_PRODUCT = "$params.defectdojo_product"
     DD_ENGAGEMENT = "$params.defectdojo_engagement"
-    DD_TOKEN = "$params.defectdojo_token"
+    DD_TOKEN = credentials("$params.defectdojo_token")
+    DD_CLOSE_OLD_FINDINGS = "$params.close_old_findings"
+    DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE = "$params.close_old_findings_product_scope"
+    DD_CREATE_FINDINGS_GROUP = "$params.create_findings_group"
+    DD_MINIMUM_SEVERITY = "$params.minimum_severity"
   }
 
   triggers {
@@ -116,7 +144,7 @@ pipeline {
       agent {
         docker {
           image "${env.UPLOADER_IMAGE}"
-          args "-e DD_TOKEN=${DD_TOKEN} -e DD_PRODUCT=${DD_PRODUCT} -e DD_ENGAGEMENT=${DD_ENGAGEMENT} -e DD_SERVER_HOST=${DD_SERVER_HOST} -v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
+          args "-v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
           reuseNode true
         }
       }
