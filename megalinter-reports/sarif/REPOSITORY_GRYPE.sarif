@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "properties": {
+        "megalinter": {
+          "docUrl": "https://megalinter.io/7.9.0/descriptors/repository_grype",
+          "linterKey": "REPOSITORY_GRYPE",
+          "linterVersion": "0.74.5"
+        }
+      },
+      "results": [],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/anchore/grype",
+          "name": "grype (MegaLinter REPOSITORY_GRYPE)",
+          "version": "0.74.5"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
