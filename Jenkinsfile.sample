@@ -1,0 +1,129 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(
+      name: 'git_repository',
+      defaultValue: '*** URL for your git repository goes here ***',
+      description: 'The URL to the git repository to scan'
+    )
+
+    string(
+      name: 'git_credentials',
+      defaultValue: '*** your credentials (e.g., Github PAT) go here ***',
+      description: 'Credentials to use when interacting with the git repository'
+    )
+
+    string(
+      name: 'git_branch',
+      defaultValue: 'main',
+      description: 'Branch to clone from the git repository'
+    )
+
+    string(
+      name: 'megalinter_image',
+      defaultValue: 'oxsecurity/megalinter-security:latest',
+      description: 'Megalinter Docker image'
+    )
+
+    string(
+      name: 'uploader_image',
+      defaultValue: 'wesleydeanflexion/upload-sarif-to-defectdojo',
+      description: 'Defectdojo Uploader Docker image'
+    )
+
+    string(
+      name: 'defectdojo_server_host',
+      defaultValue: '*** your Defectdojo server hostnames goes here ***',
+      description: 'Defectdojo server hostname'
+    )
+
+    string(
+      name: 'defectdojo_product',
+      defaultValue: '*** your product in Defectdojo goes here ***',
+      description: 'Defectdojo product'
+    )
+
+    string(
+      name: 'defectdojo_engagement',
+      defaultValue: '*** your engagement in Defectdojo goes here ***',
+      description: 'Defectdojo engagement'
+    )
+
+    string(
+      name: 'defectdojo_token',
+      defaultValue: 'DD_TOKEN',
+      description: 'Defectdojo authentication token'
+    )
+  }
+
+  environment {
+    GIT_REPOSITORY = "$params.git_repository"
+    GIT_CREDENTIALS = "$params.git_credentials"
+    GIT_BRANCH = "$params.git_branch"
+    MEGALINTER_IMAGE = "$params.megalinter_image"
+    UPLOADER_IMAGE = "$params.uploader_image"
+    DD_SERVER_HOST = "$params.defectdojo_server_host"
+    DD_PRODUCT = "$params.defectdojo_product"
+    DD_ENGAGEMENT = "$params.defectdojo_engagement"
+    DD_TOKEN = "$params.defectdojo_token"
+  }
+
+  triggers {
+    pollSCM 'H/5 * * * *'
+  }
+
+  options {
+    timestamps()
+    timeout(time: 10, unit: 'MINUTES')
+    ansiColor('xterm')
+  }
+
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: "${env.GIT_BRANCH}",
+        credentialsId: "${env.GIT_CREDENTIALS}",
+        url: "${env.GIT_REPOSITORY}"
+      }
+    }
+
+    stage('MegaLinter') {
+      agent {
+        docker {
+          image "${env.MEGALINTER_IMAGE}"
+          args "-u root -e VALIDATE_ALL_CODEBASE=true -v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
+          reuseNode true
+        }
+      }
+
+      steps {
+        sh '/entrypoint.sh'
+      }
+
+      post {
+        always {
+          archiveArtifacts allowEmptyArchive: true,
+          artifacts: 'mega-linter.log,megalinter-reports/**/*',
+          defaultExcludes: false,
+          followSymlinks: false
+        }
+      }
+    }
+
+    stage('DefectDojo') {
+      agent {
+        docker {
+          image "${env.UPLOADER_IMAGE}"
+          args "-e DD_TOKEN=${DD_TOKEN} -e DD_PRODUCT=${DD_PRODUCT} -e DD_ENGAGEMENT=${DD_ENGAGEMENT} -e DD_SERVER_HOST=${DD_SERVER_HOST} -v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
+          reuseNode true
+        }
+      }
+
+      steps {
+        sh '/upload_sarif_to_defectdojo.bash /tmp/lint/megalinter-reports/megalinter-report.sarif'
+      }
+    }
+  }
+}
