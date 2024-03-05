@@ -66,7 +66,7 @@ pipeline {
     DD_SERVER_HOST = "$params.defectdojo_server_host"
     DD_PRODUCT = "$params.defectdojo_product"
     DD_ENGAGEMENT = "$params.defectdojo_engagement"
-    DD_TOKEN = "$params.defectdojo_token"
+    DD_TOKEN = credentials("$params.defectdojo_token")
   }
 
   triggers {
