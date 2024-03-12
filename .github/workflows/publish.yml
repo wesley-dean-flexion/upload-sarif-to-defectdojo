@@ -1,13 +1,11 @@
 ---
-name: Publish Release
+name: Publish
 
 # yamllint disable-line rule:truthy
 on:
   push:
     branches:
       - "main"
-    tags:
-      - "v*"
   workflow_dispatch:
 
 permissions: read-all
@@ -91,10 +89,10 @@ jobs:
             type=sha
             type=sha,format=long
             type=edge,branch=main
-            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'ref/tags/v') }}
 
       - name: Build and push
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # pin@v4
