@@ -89,9 +89,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
-            ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}
-            quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}
+            name=registry.hub.docker.com/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
+            name=ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
+            name=quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.quay-secret.outputs.quay == 'true' }}
           tags: |
             type=sha
             type=sha,format=long
