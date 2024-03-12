@@ -1,0 +1,23 @@
+{
+  "runs": [
+    {
+      "properties": {
+        "megalinter": {
+          "docUrl": "https://megalinter.io/7.10.0/descriptors/bash_shellcheck",
+          "linterKey": "BASH_SHELLCHECK",
+          "linterVersion": "0.10.0"
+        }
+      },
+      "results": [],
+      "tool": {
+        "driver": {
+          "informationUri": "https://megalinter.io/7.10.0/descriptors/bash_shellcheck",
+          "name": "shellcheck (MegaLinter BASH_SHELLCHECK)",
+          "rules": [],
+          "version": "0.10.0"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
