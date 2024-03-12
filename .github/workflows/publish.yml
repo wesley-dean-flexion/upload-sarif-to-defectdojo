@@ -30,9 +30,39 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@0d103c3126aa41d772a8362f6aa67afac040f80c # pin@v2
 
+      - name: GHCR Secret Check
+        id: ghcr-secret
+        shell: bash
+        run: |
+          if [ "${{ secrets.GHCR_USERNAME }}" != "" ] && [ "${{ secrets.GHCR_PAT }}" != "" ] ; then
+            echo "ghcr=true" >> $GITHUB_OUTPUT
+          else
+            echo "ghcr=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: DockerHub Secret Check
+        id: dockerhub-secret
+        shell: bash
+        run: |
+          if [ "${{ secrets.DOCKERHUB_USERNAME }}" != "" ] && [ "${{ secrets.DOCKERHUB_PAT }}" != "" ] ; then
+            echo "dockerhub=true" >> $GITHUB_OUTPUT
+          else
+            echo "dockerhub=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Quay Secret Check
+        id: quay-secret
+        shell: bash
+        run: |
+          if [ "${{ secrets.QUAY_USERNAME }}" != "" ] && [ "${{ secrets.QUAY_PAT }}" != "" ] ; then
+            echo "quay=true" >> $GITHUB_OUTPUT
+          else
+            echo "quay=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Login to GitHub Packages
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: ${{ env.GHCR_USERNAME != env.GHCR_PAT }}
+        if: ${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
         with:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_PAT }}
@@ -40,7 +70,7 @@ jobs:
 
       - name: Login to Dockerhub
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: ${{ env.DOCKERHUB_USERNAME != env.DOCKERHUB_PAT }}
+        if: ${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
@@ -48,7 +78,7 @@ jobs:
 
       - name: Login to Quay
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: ${{ env.QUAY_USERNAME != env.QUAY_PAT }}
+        if: ${{ steps.quay-secret.outputs.quay == 'true' }}
         with:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PAT }}
