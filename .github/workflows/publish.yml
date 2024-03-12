@@ -5,14 +5,14 @@ name: Publish Release
 on:
   pull_request:
     branches:
-      - 'main'
-      - 'master'
+      - "main"
+      - "master"
   push:
     branches:
-      - 'main'
-      - 'master'
+      - "main"
+      - "master"
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 permissions: read-all
