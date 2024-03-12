@@ -19,7 +19,3 @@ ENTRYPOINT ["/upload_sarif_to_defectdojo.bash"]
 HEALTHCHECK NONE
 
 USER "${RUNNER}"
-
-LABEL org.opencontainers.image.source=https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo
-LABEL org.opencontainers.image.description="Upload SARIF to Defect Dojo"
-LABEL org.opencontainers.image.licenses="CC0-1.0"
