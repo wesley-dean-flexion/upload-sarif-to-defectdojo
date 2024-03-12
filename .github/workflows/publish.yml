@@ -1,10 +1,18 @@
 ---
-name: Publish
+name: Publish Release
 
 # yamllint disable-line rule:truthy
 on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'master'
   push:
-    branches: [main, master]
+    branches:
+      - 'main'
+      - 'master'
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions: read-all
@@ -24,6 +32,7 @@ jobs:
 
       - name: Login to GitHub Packages
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
+        if: secrets.GHCR_USERNAME != '' && secrets.GHCR_PAT != ''
         with:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_PAT }}
@@ -31,19 +40,42 @@ jobs:
 
       - name: Login to Dockerhub
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
+        if: secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_PAT != ''
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
           registry: registry.hub.docker.com
 
+      - name: Login to Quay
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
+        if: secrets.QUAY_USERNAME != '' && secrets.QUAY_PAT != ''
+        with:
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PAT }}
+          registry: quay.io
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+            ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}
+            quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}
+          tags: |
+            type=edge,branch=main
+            type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+
       - name: Build and push
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # pin@v4
         with:
           push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}:latest
-            registry.hub.docker.com/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
+          tags: ${{ steps.meta.tags }}
+          labels: ${{ steps.meta.labels }}
 
       - name: update DockerHub description
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # pin@v3
