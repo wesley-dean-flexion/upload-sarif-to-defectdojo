@@ -112,6 +112,7 @@ jobs:
         with:
           destination_container_repo: registry.hub.docker.com/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
           provider: dockerhub
+        env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_PASS: ${{ secrets.DOCKERHUB_PAT }}
 
@@ -121,4 +122,5 @@ jobs:
         with:
           destination_container_repo: quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}
           provider: quay
+        env:
           DOCKER_APIKEY: ${{ secrets.QUAY_PAT }}
