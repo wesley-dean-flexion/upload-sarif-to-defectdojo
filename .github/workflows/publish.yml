@@ -63,7 +63,9 @@ jobs:
             ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}
             quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}
           tags: |
-            type=edge
+            type=sha
+            type=sha,format=long
+            type=edge,branch=main
             type=semver,pattern={{version}},enable=${{ github.event_name == 'release' }}
             type=semver,pattern={{major}},enable=${{ github.event_name == 'release' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ github.event_name == 'release' }}
