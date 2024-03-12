@@ -32,7 +32,9 @@ jobs:
 
       - name: Login to GitHub Packages
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: env.GHCR_USERNAME != '' && env.GHCR_PAT != ''
+        if:
+          - env.GHCR_USERNAME != ''
+          - env.GHCR_PAT != ''
         with:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_PAT }}
@@ -40,7 +42,9 @@ jobs:
 
       - name: Login to Dockerhub
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_PAT != ''
+        if:
+          - env.DOCKERHUB_USERNAME != ''
+          - env.DOCKERHUB_PAT != ''
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
@@ -48,7 +52,9 @@ jobs:
 
       - name: Login to Quay
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # pin@v2
-        if: env.QUAY_USERNAME != '' && env.QUAY_PAT != ''
+        if:
+          - env.QUAY_USERNAME != ''
+          - env.QUAY_PAT != ''
         with:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PAT }}
