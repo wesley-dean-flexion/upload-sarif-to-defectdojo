@@ -100,6 +100,7 @@ jobs:
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # pin@v4
         with:
           push: true
+          sbom: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -111,12 +112,3 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
-
-      - name: update SBOM
-        uses: anchore/sbom-action@9fece9e20048ca9590af301449208b2b8861333b # pin@v0
-        if: ${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
-        with:
-          image: ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}:latest
-          registry-username: ${{ secrets.GHCR_USERNAME }}
-          registry-password: ${{ secrets.GHCR_PAT }}
-          artifact-name: sbom.spdx
