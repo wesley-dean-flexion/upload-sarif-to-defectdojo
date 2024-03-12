@@ -110,7 +110,7 @@ jobs:
         uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # pin@v1
         if: ${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
         with:
-          destination_container_repo: registry.hub.docker.com/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          destination_container_repo: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
           provider: dockerhub
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
