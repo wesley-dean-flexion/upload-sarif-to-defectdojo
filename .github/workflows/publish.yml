@@ -106,11 +106,12 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
-          tags: ${{ steps.meta.tags }}
-          labels: ${{ steps.meta.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: update DockerHub description
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # pin@v3
+        if: ${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
@@ -118,6 +119,7 @@ jobs:
 
       - name: update SBOM
         uses: anchore/sbom-action@9fece9e20048ca9590af301449208b2b8861333b # pin@v0
+        if: ${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
         with:
           image: ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}:latest
           registry-username: ${{ secrets.GHCR_USERNAME }}
