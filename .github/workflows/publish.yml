@@ -10,7 +10,6 @@ on:
       - "v*"
   workflow_dispatch:
 
-
 permissions: read-all
 
 jobs:
@@ -82,7 +81,6 @@ jobs:
               echo "${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}"
             fi
           ) >> $GITHUB_OUTPUT
-
 
       - name: Login to GitHub Packages
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # pin@v2
