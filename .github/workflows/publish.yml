@@ -30,11 +30,12 @@ jobs:
         id: customvars
         shell: bash
         run: |
-          ( if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
+          ( echo -n "dockerhub="
+          if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
           && [ -n "${{ secrets.DOCKERHUB_PAT }}" ] ; then
-            echo "dockerhub=true"
+            echo "true"
           else
-            echo "dockerhub=false"
+            echo "false"
           fi ) >> $GITHUB_OUTPUT
 
           if [ -n "${{ secrets.GHCR_USERNAME }}" ] \
