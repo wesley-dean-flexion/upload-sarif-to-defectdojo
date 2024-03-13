@@ -1,0 +1,9 @@
+*~
+*.lock
+*.backup
+*.tmp
+tmp*
+reports/
+megalinter-reports/
+.git
+.github

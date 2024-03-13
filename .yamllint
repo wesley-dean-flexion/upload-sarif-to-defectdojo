@@ -1,0 +1,9 @@
+---
+extends: default
+
+rules:
+  line-length: disable
+  comments:
+    min-spaces-from-content: 1
+    ignore-shebangs: true
+    require-starting-space: true
