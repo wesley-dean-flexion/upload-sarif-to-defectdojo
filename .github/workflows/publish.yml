@@ -26,39 +26,74 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # pin@v2
 
-      - name: GHCR Secret Check
-        id: ghcr-secret
+      - name: Custom Variables
+        id: customvars
         shell: bash
         run: |
-          if [ "${{ secrets.GHCR_USERNAME }}" != "" ] && [ "${{ secrets.GHCR_PAT }}" != "" ] ; then
-            echo "ghcr=true" >> $GITHUB_OUTPUT
-          else
-            echo "ghcr=false" >> $GITHUB_OUTPUT
-          fi
+          (
+            echo -n "dockerhub="
+            if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
+            && [ -n "${{ secrets.DOCKERHUB_PAT }}" ] ; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "ghcr="
+            if [ -n "${{ secrets.GHCR_USERNAME }}" ] \
+            && [ -n "${{ secrets.GHCR_PAT }}" ] ; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "quay="
+            if [ -n "${{ secrets.QUAY_USERNAME }}" ] \
+            && [ -n "${{ secrets.QUAY_PAT }}" ] ; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "is_release="
+            if [[ "${{ github.ref }}" =~ refs/tags/v.* ]] ; then
+              echo "true"
+            else
+              echo "false"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "dockerhub_image="
+            if [ -n "${{ env.dockerhub_image }}" ] ; then
+              echo "${{ env.dockerhub_image }}"
+            else
+              echo "${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "ghcr_image="
+            if [ -n "${{ env.ghcr_image }}" ] ; then
+              echo "${{ env.ghcr_image }}"
+            else
+              echo "${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}"
+            fi
+          ) >> $GITHUB_OUTPUT
+          (
+            echo -n "quay_image="
+            if [ -n "${{ env.quay_image }}" ] ; then
+              echo "${{ env.quay_image }}"
+            else
+              echo "${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}"
+            fi
+          ) >> $GITHUB_OUTPUT
 
-      - name: DockerHub Secret Check
-        id: dockerhub-secret
-        shell: bash
-        run: |
-          if [ "${{ secrets.DOCKERHUB_USERNAME }}" != "" ] && [ "${{ secrets.DOCKERHUB_PAT }}" != "" ] ; then
-            echo "dockerhub=true" >> $GITHUB_OUTPUT
-          else
-            echo "dockerhub=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Quay Secret Check
-        id: quay-secret
-        shell: bash
-        run: |
-          if [ "${{ secrets.QUAY_USERNAME }}" != "" ] && [ "${{ secrets.QUAY_PAT }}" != "" ] ; then
-            echo "quay=true" >> $GITHUB_OUTPUT
-          else
-            echo "quay=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Login to GitHub Packages
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # pin@v2
-        if: ${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
+        if: ${{ steps.customvars.outputs.ghcr == 'true' }}
         with:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_PAT }}
@@ -66,7 +101,7 @@ jobs:
 
       - name: Login to Dockerhub
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # pin@v2
-        if: ${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
+        if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PAT }}
@@ -74,7 +109,7 @@ jobs:
 
       - name: Login to Quay
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # pin@v2
-        if: ${{ steps.quay-secret.outputs.quay == 'true' }}
+        if: ${{ steps.customvars.outputs.quay == 'true' }}
         with:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PAT }}
@@ -85,14 +120,14 @@ jobs:
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # pin@v5
         with:
           images: |
-            name=registry.hub.docker.com/${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
-            name=ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.ghcr-secret.outputs.ghcr == 'true' }}
-            name=quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }},enable=${{ steps.quay-secret.outputs.quay == 'true' }}
+            name=${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
+            name=ghcr.io/${{ steps.customvars.outputs.ghcr_image }},enable=${{ steps.customvars.outputs.ghcr == 'true' }}
+            name=quay.io/${{ steps.customvars.outputs.quay_image }},enable=${{ steps.customvars.outputs.quay == 'true' }}
           tags: |
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'ref/tags/v') }}
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=latest,enable=${{ steps.customvars.outputs.is_release == 'true' }}
+            type=semver,pattern={{version}},enable=${{ steps.customvars.outputs.is_release == 'true' ) }}
+            type=semver,pattern={{major}},enable=${{ steps.customvars.outputs.is_release == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ steps.customvars.outputs.is_release == 'true' }}
             type=edge,branch=main
             type=sha
             type=sha,format=long
@@ -108,9 +143,9 @@ jobs:
 
       - name: update DockerHub description
         uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # pin@v1
-        if: ${{ steps.dockerhub-secret.outputs.dockerhub == 'true' }}
+        if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
         with:
-          destination_container_repo: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          destination_container_repo: ${{ steps.customvars.outputs.dockerhub_image }}
           provider: dockerhub
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -118,9 +153,9 @@ jobs:
 
       - name: update Quay description
         uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # pin@v1
-        if: ${{ steps.quay-secret.outputs.quay == 'true' }}
+        if: ${{ steps.customvars.outputs.quay == 'true' }}
         with:
-          destination_container_repo: quay.io/${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}
+          destination_container_repo: ${{ steps.customvars.outputs.quay_image }}
           provider: quay
         env:
           DOCKER_APIKEY: ${{ secrets.QUAY_PAT }}
