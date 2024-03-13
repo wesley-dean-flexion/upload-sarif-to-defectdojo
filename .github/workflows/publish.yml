@@ -30,65 +30,50 @@ jobs:
         id: customvars
         shell: bash
         run: |
-          (
-            echo -n "dockerhub="
-            if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
-            && [ -n "${{ secrets.DOCKERHUB_PAT }}" ] ; then
-              echo "true"
-            else
-              echo "false"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "ghcr="
-            if [ -n "${{ secrets.GHCR_USERNAME }}" ] \
-            && [ -n "${{ secrets.GHCR_PAT }}" ] ; then
-              echo "true"
-            else
-              echo "false"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "quay="
-            if [ -n "${{ secrets.QUAY_USERNAME }}" ] \
-            && [ -n "${{ secrets.QUAY_PAT }}" ] ; then
-              echo "true"
-            else
-              echo "false"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "is_release="
-            if [[ "${{ github.ref }}" =~ refs/tags/v.* ]] ; then
-              echo "true"
-            else
-              echo "false"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "dockerhub_image="
-            if [ -n "${{ env.dockerhub_image }}" ] ; then
-              echo "${{ env.dockerhub_image }}"
-            else
-              echo "${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "ghcr_image="
-            if [ -n "${{ env.ghcr_image }}" ] ; then
-              echo "${{ env.ghcr_image }}"
-            else
-              echo "${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}"
-            fi
-          ) >> $GITHUB_OUTPUT
-          (
-            echo -n "quay_image="
-            if [ -n "${{ env.quay_image }}" ] ; then
-              echo "${{ env.quay_image }}"
-            else
-              echo "${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}"
-            fi
-          ) >> $GITHUB_OUTPUT
+          if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
+          && [ -n "${{ secrets.DOCKERHUB_PAT }}" ] ; then
+            echo "dockerhub=true" >> $GITHUB_OUTPUT
+          else
+            echo "dockerhub=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "${{ secrets.GHCR_USERNAME }}" ] \
+          && [ -n "${{ secrets.GHCR_PAT }}" ] ; then
+            echo "ghcr=true" >> $GITHUB_OUTPUT
+          else
+            echo "ghcr=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "${{ secrets.QUAY_USERNAME }}" ] \
+          && [ -n "${{ secrets.QUAY_PAT }}" ] ; then
+            echo "quay=true" >> $GITHUB_OUTPUT
+          else
+            echo "quay=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ "${{ github.ref }}" =~ refs/tags/v.* ]] ; then
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "${{ env.dockerhub_image }}" ] ; then
+            echo "dockerhub_image=${{ env.dockerhub_image }}"
+          else
+            echo "dockerhub_image=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}"
+          fi
+
+          if [ -n "${{ env.ghcr_image }}" ] ; then
+            echo "ghcr_image=${{ env.ghcr_image }}" >> $GITHUB_OUTPUT
+          else
+            echo "ghcr_image=${{ secrets.GHCR_USERNAME }}/${{ github.event.repository.name }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "${{ env.quay_image }}" ] ; then
+            echo "quay_image=${{ env.quay_image }}" >> $GITHUB_OUTPUT
+          else
+            echo "quay_image=${{ secrets.QUAY_USERNAME }}/${{ github.event.repository.name }}"
+          fi
 
 
       - name: Login to GitHub Packages
