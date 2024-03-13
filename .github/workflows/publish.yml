@@ -30,12 +30,12 @@ jobs:
         id: customvars
         shell: bash
         run: |
-          if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
+          ( if [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] \
           && [ -n "${{ secrets.DOCKERHUB_PAT }}" ] ; then
-            echo "dockerhub=true" >> $GITHUB_OUTPUT
+            echo "dockerhub=true"
           else
-            echo "dockerhub=false" >> $GITHUB_OUTPUT
-          fi
+            echo "dockerhub=false"
+          fi ) >> $GITHUB_OUTPUT
 
           if [ -n "${{ secrets.GHCR_USERNAME }}" ] \
           && [ -n "${{ secrets.GHCR_PAT }}" ] ; then
@@ -110,7 +110,7 @@ jobs:
             name=quay.io/${{ steps.customvars.outputs.quay_image }},enable=${{ steps.customvars.outputs.quay == 'true' }}
           tags: |
             type=raw,value=latest,enable=${{ steps.customvars.outputs.is_release == 'true' }}
-            type=semver,pattern={{version}},enable=${{ steps.customvars.outputs.is_release == 'true' ) }}
+            type=semver,pattern={{version}},enable=${{ steps.customvars.outputs.is_release == 'true' }}
             type=semver,pattern={{major}},enable=${{ steps.customvars.outputs.is_release == 'true' }}
             type=semver,pattern={{major}}.{{minor}},enable=${{ steps.customvars.outputs.is_release == 'true' }}
             type=edge,branch=main
