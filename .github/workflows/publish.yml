@@ -113,7 +113,7 @@ jobs:
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # pin@v5
         with:
           images: |
-            name=${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
+            name=registry.hub.docker.com/${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
             name=ghcr.io/${{ steps.customvars.outputs.ghcr_image }},enable=${{ steps.customvars.outputs.ghcr == 'true' }}
             name=quay.io/${{ steps.customvars.outputs.quay_image }},enable=${{ steps.customvars.outputs.quay == 'true' }}
           tags: |
