@@ -1,5 +1,8 @@
 # Upload Sarif results to Defect Dojo
 
+[![Publish](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml)
+[![MegaLinter](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/megalinter.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/megalinter.yml)
+
 ## Quickstart
 
 This should get you started:
