@@ -9,7 +9,7 @@ on:
 permissions: read-all
 
 jobs:
-  docker:
+  test_image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
