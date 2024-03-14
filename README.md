@@ -1,7 +1,8 @@
 # Upload Sarif results to Defect Dojo
 
-[![Publish](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml)
 [![MegaLinter](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/megalinter.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/megalinter.yml)
+[![Test](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/test.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/test.yml)
+[![Publish](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml/badge.svg)](https://github.com/wesley-dean-flexion/upload-sarif-to-defectdojo/actions/workflows/publish.yml)
 
 ## Quickstart
 
