@@ -95,6 +95,8 @@ pipeline {
     DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE = "$params.close_old_findings_product_scope"
     DD_CREATE_FINDINGS_GROUP = "$params.create_findings_group"
     DD_MINIMUM_SEVERITY = "$params.minimum_severity"
+    SARIF_REPORTER = "true"
+    DISABLE_ERRORS = "true"
   }
 
   triggers {
