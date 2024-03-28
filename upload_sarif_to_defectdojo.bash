@@ -68,7 +68,7 @@ set -euo pipefail
 is_git_repository() {
   directory="$(dirname "${1:-.}")"
 
-  (
+  ( 
     cd "$directory" || exit 1
     git rev-parse --quiet > /dev/null 2>&1
   )
@@ -93,7 +93,7 @@ is_git_repository() {
 git_branch() {
   directory="$(dirname "${1:-.}")"
 
-  (
+  ( 
     cd "$directory" || exit 1
     git branch --show-current
   )
@@ -211,7 +211,7 @@ get_scm_url() {
   directory="$(dirname "${1:-.}")"
   origin="${2:-origin}"
 
-  (
+  ( 
     cd "$directory" || exit 1
     git remote get-url --push "$origin" | sed -Ee 's|://[^@]*@|://|' -Ee 's|\.git$||'
   )
@@ -234,7 +234,7 @@ get_scm_url() {
 get_commit_hash() {
   directory="$(dirname "${1:-.}")"
 
-  (
+  ( 
     cd "$directory" || exit 1
     git log -n1 --pretty=format:"%H"
   )
@@ -310,7 +310,7 @@ display_usage() {
 
   local usage
   usage="$(
-    (
+    ( 
       sed -Ene "s/^[[:space:]]*(['\"])([[:alnum:]]*)\1[[:space:]]*\).*##-[[:space:]]*(.*)/\-\2\t\t: \3/p" < "$0"
       sed -Ene "s/^[[:space:]]*(['\"])([-[:alnum:]]*)*\1[[:space:]]*\)[[:space:]]*set[[:space:]]*--[[:space:]]*(['\"])[@$]*\3[[:space:]]*(['\"])(-[[:alnum:]])\4.*##-[[:space:]]*(.*)/\2\t\t: \6/p" < "$0"
     ) | sort --ignore-case
