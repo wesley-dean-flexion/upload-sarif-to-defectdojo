@@ -235,14 +235,6 @@ The default value is 'false'
 
 The default value is 'false'
 
-### DD_CREATE_FINDINGS_GROUP
-
-`DD_CREATE_FINDINGS_GROUP` will create finding groups for single findings
-
-If false, findings will be grouped only when multiple findings.  The default
-value is 'true'.  Regardless of this setting, scans with multiple findings
-will always be grouped
-
 ### DD_FILE_TYPE
 
 `DD_FILE_TYPE` is the MIME type for the file to be uploaded
