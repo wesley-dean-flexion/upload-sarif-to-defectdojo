@@ -438,7 +438,6 @@ main() {
     form_values+=("active=${DD_ACTIVE:-true}")
     form_values+=("close_old_findings=${DD_CLOSE_OLD_FINDINGS:-false}")
     form_values+=("close_old_findings_product_scope=${DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE:-false}")
-    form_values+=("create_finding_groups_for_all_findings=${DD_CREATE_FINDINGS_GROUP:-false}")
     form_values+=("engagement_name=${DD_ENGAGEMENT:-cicd}")
     form_values+=("minimum_severity=${DD_MINIMUM_SEVERITY:-Info}")
     form_values+=("product_name=${DD_PRODUCT?No DD_PRODUCT provided}")
