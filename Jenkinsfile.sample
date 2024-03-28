@@ -1,3 +1,54 @@
+// This pipeline runs in containerized environments, so there are very
+// fewer requirements of the Jenkins worker nodes -- they just need
+// to be able to run Docker containers.  Megalinter, the SARIF uploader,
+// etc. do not need to be installed.
+//
+// The pipeline has 3 basic steps:
+//
+// 1. Clone the git repository
+// 2. Run Megalinter on the local clone
+// 3. Push the results (SARIF files) to DefectDojo
+//
+// The git repository checkout process uses the Git plugin for Jenkins.
+//
+// The Megalinter and DefectDojo uploader processes use images available
+// from the Internet (e.g., DockerHub).  As the Megalinter image -- even
+// the security flavor -- can be quite large (e.g.,
+// oxsecurity/megalinter-security:v7.10.0 is 999.5MB across 67 layers),
+// one may wish to `docker pull oxsecurity/megalinter-security:latest`
+// on the worker nodes outside of this pipeline or use a local registry
+// to cache the image to improve load times.
+//
+// It's important to reuse nodes (`reuseNode true`) so that the SARIF
+// files produced by Megalinter may be uploaded to DefectDojo; otherwise,
+// Docker may run the steps in different workspaces, potentially on
+// different nodes or with different agents.
+//
+// Note: one may wish to configure Jenkins that use Docker-based pipelines
+// to use a specific set of credentials to get around rate limitations
+// with DockerHub.  To do so, a `.withRegistry()` call with the URL and
+// credentials ID may be used
+//
+// Docker images:
+//   * https://hub.docker.com/r/oxsecurity/megalinter-security
+//   * https://hub.docker.com/r/wesleydeanflexion/upload-sarif-to-defectdojo
+//
+// Required Jenkins plugins:
+//   * Git: https://plugins.jenkins.io/git/
+//   * AnsiColor: https://plugins.jenkins.io/ansicolor/
+//
+// Required credential objects:
+//   * GitHub PAT (for pulling the repository)
+//   * Defect Dojo token (for uploading the results)
+//
+// To use this Jenkinsfile, several parameters need to be set:
+//   * git_repository: URL to the git repository
+//   * git_credentials: credential ID to use to interact with git
+//   * defectdojo_token: credential ID to use to interact with DefectDojo
+//
+// Generally, the fields that need to be updated have three stars (`***`)
+// in the `defaultValue` field.
+
 pipeline {
   agent any
 
@@ -10,8 +61,8 @@ pipeline {
 
     string(
       name: 'git_credentials',
-      defaultValue: '*** your credentials (e.g., Github PAT) go here ***',
-      description: 'Credentials to use when interacting with the git repository'
+      defaultValue: '*** ID of your credentials (e.g., Github PAT) go here ***',
+      description: 'Credential ID to use when interacting with the git repository'
     )
 
     string(
@@ -62,22 +113,16 @@ pipeline {
       description: 'The minimum severity finding to record'
     )
 
-    booleanParam(
+    choice(
       name: 'close_old_findings',
-      defaultValue: false,
+      choices: ['true', 'false'],
       description: 'Close old findings'
     )
 
-    booleanParam(
+    choice(
       name: 'close_old_findings_product_scope',
-      defaultValue: false,
+      choices: ['true', 'false'],
       description: 'Close old findings with the same product scope'
-    )
-
-    booleanParam(
-      name: 'create_fndings_group',
-      defaultValue: false,
-      description: 'Whether or not to create a findings group'
     )
   }
 
@@ -85,27 +130,44 @@ pipeline {
     GIT_REPOSITORY = "$params.git_repository"
     GIT_CREDENTIALS = "$params.git_credentials"
     GIT_BRANCH = "$params.git_branch"
+
     MEGALINTER_IMAGE = "$params.megalinter_image"
-    UPLOADER_IMAGE = "$params.uploader_image"
+    SARIF_REPORTER = "true"
+    DISABLE_ERRORS = "true"
+    ADDITIONAL_EXCLUDED_DIRECTORIES = "**/megalinter-reports/**"
+    VALIDATE_ALL_CODEBASE = "true"
+    IGNORE_GITIGNORED_FILES="true"
+
+    DD_UPLOADER_IMAGE = "$params.uploader_image"
+    DD_MINIMUM_SEVERITY = "$params.minimum_severity"
     DD_SERVER_HOST = "$params.defectdojo_server_host"
     DD_PRODUCT = "$params.defectdojo_product"
     DD_ENGAGEMENT = "$params.defectdojo_engagement"
     DD_TOKEN = credentials("$params.defectdojo_token")
     DD_CLOSE_OLD_FINDINGS = "$params.close_old_findings"
     DD_CLOSE_OLD_FINDINGS_PRODUCT_SCOPE = "$params.close_old_findings_product_scope"
-    DD_CREATE_FINDINGS_GROUP = "$params.create_findings_group"
-    DD_MINIMUM_SEVERITY = "$params.minimum_severity"
-    SARIF_REPORTER = "true"
-    DISABLE_ERRORS = "true"
   }
 
   triggers {
+    // check with the repo for fresh commits every 5 minutes; when there
+    // are new commits on the main branch, trigger a run of this pipeline
     pollSCM 'H/5 * * * *'
   }
 
   options {
+    // when stuff takes a while, it can be helpful to correlate delays with
+    // log entries
     timestamps()
+
+    // it can take a few minutes to pull down the Megalinter image the first
+    // time (expedite with a local proxy or `docker pull` beforehand on the
+    // worker nodes); after that, a scan generally takes less than a minute
+    // to run.  If a scanner gets stuck, cut it off after 10 minutes
     timeout(time: 10, unit: 'MINUTES')
+
+    // Megalinter logs can contain ANSI color sequences, so interpret them
+    // with the ANSI Color plugin: https://plugins.jenkins.io/ansicolor/
+    // so, if nothing else, at least the color sequences are filtered out
     ansiColor('xterm')
   }
 
@@ -113,6 +175,11 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+        // we need to cleanup the workspace so old SARIF files are
+        // removed and not resubmitted after that findings are
+        // remediated
+        cleanWs()
+
         git branch: "${env.GIT_BRANCH}",
         credentialsId: "${env.GIT_CREDENTIALS}",
         url: "${env.GIT_REPOSITORY}"
@@ -123,7 +190,7 @@ pipeline {
       agent {
         docker {
           image "${env.MEGALINTER_IMAGE}"
-          args "-u root -e VALIDATE_ALL_CODEBASE=true -v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
+          args "-u root -v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
           reuseNode true
         }
       }
@@ -134,6 +201,7 @@ pipeline {
 
       post {
         always {
+          // capture the linter logs as build artifacts
           archiveArtifacts allowEmptyArchive: true,
           artifacts: 'mega-linter.log,megalinter-reports/**/*',
           defaultExcludes: false,
@@ -145,14 +213,14 @@ pipeline {
     stage('DefectDojo') {
       agent {
         docker {
-          image "${env.UPLOADER_IMAGE}"
+          image "${env.DD_UPLOADER_IMAGE}"
           args "-v ${WORKSPACE}:/tmp/lint -w /tmp/lint --entrypoint=''"
           reuseNode true
         }
       }
 
       steps {
-        sh '/upload_sarif_to_defectdojo.bash /tmp/lint/megalinter-reports/megalinter-report.sarif'
+        sh '/upload_sarif_to_defectdojo.bash /tmp/lint/megalinter-reports/sarif/*.sarif'
       }
     }
   }
