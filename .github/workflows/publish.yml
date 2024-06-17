@@ -126,7 +126,7 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
       - name: Build and push
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # pin@v4
+        uses: docker/build-push-action@c382f710d39a5bb4e430307530a720f50c2d3318 # pin@v4
         with:
           push: true
           sbom: true
